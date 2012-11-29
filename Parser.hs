@@ -29,7 +29,11 @@ token :: Parser a -> Parser a
 token m = m #- spaces
 
 letter :: Parser Char
-letter =  error "letter not implemented"
+letter [] =  Nothing
+letter (x:xs) = if any (== x) ['0'..'9'] then
+					Nothing
+				else
+					Just (x,xs)
 
 word :: Parser String
 word = token (letter # iter letter >-> cons)
