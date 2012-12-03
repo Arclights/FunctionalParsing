@@ -6,11 +6,34 @@ import qualified Expr
 type T = Statement
 data Statement =
     Assignment String Expr.T |
-    If Expr.T Statement Statement
+	Skip|
+	Begin Statement|
+    If Expr.T Statement Statement|
+	While Expr.T Statement|
+	Read String|
+	Write Expr.T
     deriving Show
 
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
 buildAss (v, e) = Assignment v e
+
+skip = accept "skip" #- require ";" >-> buildSkip
+buildSkip s = Skip
+
+beginState = accept "begin" # parse #- require "end" >-> buildBegin
+buildBegin (v, e) = Begin e
+
+ifState = accept "if" # Expr.parse #- require "then" # parse #- require "else" # parse >-> buildIf
+buildIf (((s, v), e), g) = If v e g
+
+whileState = accept "while" # Expr.parse #- require "do" # parse >-> buildWhile
+buildWhile ((s, v), e) = While v e
+
+readState = accept "read" # word #- require ";" >-> buildRead
+buildRead (v, e) = Read e
+
+writeState = accept "write" # Expr.parse #- require ";" >-> buildWrite
+buildWrite (v, e) = Write e
 
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
 exec (If cond thenStmts elseStmts: stmts) dict input = 
