@@ -5,13 +5,13 @@ import qualified Dictionary
 import qualified Expr
 type T = Statement
 data Statement =
-    Assignment String Expr.T |
-	Skip|
-	Begin Statement|
-    If Expr.T Statement Statement|
-	While Expr.T Statement|
-	Read String|
-	Write Expr.T
+    Assignment String Expr.T
+	| Skip
+	| Begin [Statement]
+    | If Expr.T Statement Statement
+	| While Expr.T Statement
+	| Read String
+	| Write Expr.T
     deriving Show
 
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
@@ -20,7 +20,7 @@ buildAss (v, e) = Assignment v e
 skip = accept "skip" #- require ";" >-> buildSkip
 buildSkip s = Skip
 
-beginState = accept "begin" # parse #- require "end" >-> buildBegin
+beginState = accept "begin" # iter parse #- require "end" >-> buildBegin
 buildBegin (v, e) = Begin e
 
 ifState = accept "if" # Expr.parse #- require "then" # parse #- require "else" # parse >-> buildIf
@@ -41,6 +41,7 @@ exec (If cond thenStmts elseStmts: stmts) dict input =
     then exec (thenStmts: stmts) dict input
     else exec (elseStmts: stmts) dict input
 
+
 instance Parse Statement where
-  parse = error "Statement.parse not implemented"
+  parse = skip ! beginState ! ifState ! whileState ! readState ! writeState ! assignment
   toString = error "Statement.toString not implemented"
