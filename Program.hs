@@ -6,6 +6,6 @@ import Prelude hiding (return, fail)
 newtype T = Program [Statement.T] -- to be defined
 instance Parse T where
   parse = iter (Statement.parse) >-> Program
-  toString = error "Program.toString not implemented"
+  toString (Program stmts) = concat (map (Statement.toString) stmts)
 
 exec (Program stmts) = Statement.exec stmts Dictionary.empty

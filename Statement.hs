@@ -54,4 +54,14 @@ exec (Write expr :stmts) dict input = (Expr.value expr dict):(exec stmts dict in
 
 instance Parse Statement where
   parse = skip ! beginState ! ifState ! whileState ! readState ! writeState ! assignment
-  toString = error "Statement.toString not implemented"
+  toString (Assignment string expr) = string ++ " := " ++ (Expr.toString expr) ++ ";\n"
+  toString Skip = "Skip;\n"
+  toString (Begin stmts) = "Begin\n" ++ (listToString stmts) ++ "end\n"
+  toString (If expr ifStmt elseStmt) = "if " ++ (Expr.toString expr) ++ " then\n" ++ (toString ifStmt) ++ (toString elseStmt)
+  toString (While expr stmt) = "While " ++ (Expr.toString expr) ++ " do\n" ++ (toString stmt)
+  toString (Read string) = "read " ++ string ++ ";\n"
+  toString (Write expr) = "write " ++ (Expr.toString expr) ++ ";\n"
+  
+listToString :: [Statement] -> String
+listToString [] = ""
+listToString (x:xs) = (toString x) ++ (listToString xs)
