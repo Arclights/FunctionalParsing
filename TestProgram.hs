@@ -2,7 +2,7 @@
 module TestProgram where
 
 import Program
-p, p1, p2:: Program.T
+p, p1:: Program.T
 p = fromString  ("\
 \read k;\
 \read n;\
