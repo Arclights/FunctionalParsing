@@ -38,8 +38,8 @@ buildWrite (v, e) = Write e
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
 exec [] _ _ = []
 exec (Assignment str expr :stmts) dict input = exec stmts (Dictionary.insert (str, (Expr.value expr dict)) dict) input
-exec (Skip :stmts) dict input = []
-exec (Begin stmts1 :stmts2) dict input = (exec stmts1 dict input)++(exec stmts2 dict input)
+exec (Skip :stmts) dict input = exec stmts dict input
+exec (Begin stmts1 :stmts2) dict input = (exec (stmts1++stmts2) dict input)
 exec (If cond thenStmts elseStmts: stmts) dict input = 
     if (Expr.value cond dict)>0 
     then exec (thenStmts: stmts) dict input
